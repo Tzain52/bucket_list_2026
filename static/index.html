@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our 2026 Bucket List 💕</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">Our 2026 Journey</h1>
+                <p class="subtitle">Dreams we'll chase together</p>
+            </div>
+        </header>
+
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-value" id="total-count">0</div>
+                    <div class="stat-label">Total Dreams</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-value" id="pending-count">0</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✨</div>
+                    <div class="stat-value" id="completed-count">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="stat-card highlight">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-value" id="completion-percentage">0%</div>
+                    <div class="stat-label">Progress</div>
+                </div>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+        </section>
+
+        <section class="action-section">
+            <button class="btn btn-primary" onclick="openAddModal()">
+                <span class="btn-icon">+</span>
+                Add New Dream
+            </button>
+        </section>
+
+        <section class="items-section">
+            <div class="items-grid" id="items-grid">
+            </div>
+            <div class="empty-state" id="empty-state">
+                <div class="empty-icon">🌟</div>
+                <h3>Start Your Journey</h3>
+                <p>Add your first bucket list item to begin your 2026 adventure together!</p>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="add-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Add a New Dream</h2>
+                <button class="close-btn" onclick="closeAddModal()">&times;</button>
+            </div>
+            <form onsubmit="addItem(event)">
+                <div class="form-group">
+                    <label for="description">What do you dream of? (1-2 sentences)</label>
+                    <textarea 
+                        id="description" 
+                        name="description" 
+                        rows="3" 
+                        maxlength="500" 
+                        required
+                        placeholder="Describe your dream..."></textarea>
+                    <div class="char-count" id="char-count">0/500</div>
+                </div>
+                <div class="form-group">
+                    <label>Who's adding this?</label>
+                    <div class="name-selector">
+                        <div class="name-option" onclick="selectName(this, 'Murtaza')">Murtaza</div>
+                        <div class="name-option" onclick="selectName(this, 'Mubarakah')">Mubarakah</div>
+                    </div>
+                    <input type="hidden" id="added-by" name="added_by" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeAddModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Dream</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Edit Dream</h2>
+                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+            </div>
+            <form onsubmit="updateItem(event)">
+                <input type="hidden" id="edit-item-id">
+                <div class="form-group">
+                    <label for="edit-description">Description</label>
+                    <textarea 
+                        id="edit-description" 
+                        name="description" 
+                        rows="3" 
+                        maxlength="500" 
+                        required></textarea>
+                    <div class="char-count" id="edit-char-count">0/500</div>
+                </div>
+                <div class="form-group">
+                    <label>Added by</label>
+                    <div class="name-selector">
+                        <div class="name-option" onclick="selectEditName(this, 'Murtaza')">Murtaza</div>
+                        <div class="name-option" onclick="selectEditName(this, 'Mubarakah')">Mubarakah</div>
+                    </div>
+                    <input type="hidden" id="edit-added-by" name="added_by" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="photo-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Add Completion Photo</h2>
+                <button class="close-btn" onclick="closePhotoModal()">&times;</button>
+            </div>
+            <form onsubmit="uploadPhoto(event)">
+                <input type="hidden" id="photo-item-id">
+                <div class="form-group">
+                    <label for="photo-upload">Choose photos to celebrate this moment</label>
+                    <input 
+                        type="file" 
+                        id="photo-upload" 
+                        name="photo" 
+                        accept="image/*"
+                        multiple
+                        required
+                        class="file-input">
+                    <div class="file-preview" id="file-preview"></div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closePhotoModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Upload Photo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="view-photo-modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 class="modal-title">Photo Gallery</h2>
+                <button class="close-btn" onclick="closeViewPhotoModal()">&times;</button>
+            </div>
+            <div class="photo-gallery" id="photo-gallery">
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
