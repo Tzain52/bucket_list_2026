@@ -1,30 +1,13 @@
 steps:
-  # Build the container image
-  - name: 'gcr.io/cloud-builders/docker'
-    args: 
-      - 'build'
-      - '-t'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/bucket-list-2026:$COMMIT_SHA'
-      - '-t'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/bucket-list-2026:latest'
-      - '.'
-  
-  # Push the container image to Artifact Registry
-  - name: 'gcr.io/cloud-builders/docker'
-    args: 
-      - 'push'
-      - '--all-tags'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/bucket-list-2026'
-  
-  # Deploy container image to Cloud Run
+  # Deploy directly using gcloud run deploy with source
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
       - 'run'
       - 'deploy'
       - 'bucket-list-2026'
-      - '--image'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/bucket-list-2026:latest'
+      - '--source'
+      - '.'
       - '--region'
       - 'us-central1'
       - '--platform'
@@ -36,13 +19,8 @@ steps:
       - '1'
       - '--max-instances'
       - '5'
-      - '--port'
-      - '8080'
       - '--update-secrets'
       - 'DATABASE_URL=DATABASE_URL:latest,SECRET_KEY=SECRET_KEY:latest'
-
-images:
-  - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/bucket-list-2026'
 
 options:
   logging: CLOUD_LOGGING_ONLY
