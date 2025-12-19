@@ -56,6 +56,211 @@ body {
     line-height: 1.6;
     padding: 20px;
     position: relative;
+    overflow-x: hidden;
+}
+
+/* Splash Screen Styles */
+.splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--beige-light) 0%, var(--cream) 50%, var(--beige-medium) 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
+}
+
+.splash-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.splash-content {
+    position: relative;
+    width: 90%;
+    max-width: 1200px;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.splash-image {
+    width: 100%;
+    height: auto;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(125, 46, 46, 0.3);
+    animation: fadeInScale 1s ease-out;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.splash-clickable-area {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60%;
+    height: 40%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    border-radius: 16px;
+}
+
+.splash-clickable-area:hover {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+}
+
+.enter-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    animation: fadeInPrompt 1s ease-out 1.5s forwards, pulse 2s ease-in-out 2.5s infinite;
+    background: rgba(255, 254, 249, 0.95);
+    padding: 20px 40px;
+    border-radius: 50px;
+    box-shadow: 0 8px 24px rgba(125, 46, 46, 0.2);
+    border: 2px solid var(--maroon);
+}
+
+@keyframes fadeInPrompt {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.enter-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--maroon-dark);
+    text-align: center;
+}
+
+.enter-icon {
+    font-size: 1.8rem;
+    animation: sparkle 1.5s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.2) rotate(180deg);
+    }
+}
+
+.splash-clickable-area:active .enter-prompt {
+    transform: scale(0.95);
+}
+
+#main-content {
+    opacity: 0;
+    transition: opacity 0.8s ease-in;
+}
+
+#main-content.visible {
+    opacity: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .splash-content {
+        width: 95%;
+    }
+    
+    .splash-image {
+        max-height: 85vh;
+    }
+    
+    .splash-clickable-area {
+        width: 70%;
+        height: 35%;
+    }
+    
+    .enter-prompt {
+        padding: 15px 30px;
+    }
+    
+    .enter-text {
+        font-size: 1.2rem;
+    }
+    
+    .enter-icon {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .splash-clickable-area {
+        width: 80%;
+        height: 30%;
+    }
+    
+    .enter-prompt {
+        padding: 12px 24px;
+    }
+    
+    .enter-text {
+        font-size: 1rem;
+    }
+    
+    .enter-icon {
+        font-size: 1.3rem;
+    }
+}
+
+@media (orientation: landscape) and (max-height: 600px) {
+    .splash-image {
+        max-height: 80vh;
+    }
+    
+    .enter-prompt {
+        padding: 10px 25px;
+    }
+    
+    .enter-text {
+        font-size: 1.1rem;
+    }
 }
 
 .container {

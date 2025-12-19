@@ -3,11 +3,55 @@ const API_BASE = '/api';
 let currentItems = [];
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadItems();
-    loadStats();
+    setupSplashScreen();
     setupCharCounters();
     setupFilePreview();
 });
+
+function setupSplashScreen() {
+    const splashScreen = document.getElementById('splash-screen');
+    const splashEnter = document.getElementById('splash-enter');
+    const mainContent = document.getElementById('main-content');
+    
+    // Check if user has already seen splash screen in this session
+    const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
+    
+    if (hasSeenSplash) {
+        // Skip splash screen
+        splashScreen.classList.add('hidden');
+        mainContent.classList.add('visible');
+        loadItems();
+        loadStats();
+    } else {
+        // Show splash screen
+        splashEnter.addEventListener('click', () => {
+            // Mark as seen
+            sessionStorage.setItem('hasSeenSplash', 'true');
+            
+            // Hide splash screen
+            splashScreen.classList.add('hidden');
+            
+            // Show main content after a short delay
+            setTimeout(() => {
+                mainContent.classList.add('visible');
+                loadItems();
+                loadStats();
+            }, 300);
+        });
+    }
+    
+    // Prevent body scroll when splash is visible
+    if (!hasSeenSplash) {
+        document.body.style.overflow = 'hidden';
+        
+        // Re-enable scroll when splash is hidden
+        splashEnter.addEventListener('click', () => {
+            setTimeout(() => {
+                document.body.style.overflow = 'auto';
+            }, 800);
+        });
+    }
+}
 
 function setupCharCounters() {
     const descInput = document.getElementById('description');
