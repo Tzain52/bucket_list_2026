@@ -178,7 +178,7 @@ function renderItems(items) {
                             type="checkbox" 
                             class="checkbox" 
                             ${item.is_completed ? 'checked' : ''}
-                            onchange="toggleComplete(${item.id}, this.checked)"
+                            onchange="toggleComplete(${item.id}, this.checked, this)"
                         >
                     </div>
                     <span class="item-badge">${item.added_by}</span>
@@ -242,6 +242,14 @@ function closeAddModal() {
 async function addItem(event) {
     event.preventDefault();
     
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Adding...';
+    submitBtn.style.opacity = '0.6';
+    submitBtn.style.cursor = 'not-allowed';
+    
     const description = document.getElementById('description').value;
     const addedBy = document.getElementById('added-by').value;
     
@@ -268,6 +276,11 @@ async function addItem(event) {
     } catch (error) {
         console.error('Error adding item:', error);
         showNotification('Failed to add dream', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
     }
 }
 
@@ -297,6 +310,14 @@ function closeEditModal() {
 async function updateItem(event) {
     event.preventDefault();
     
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving...';
+    submitBtn.style.opacity = '0.6';
+    submitBtn.style.cursor = 'not-allowed';
+    
     const itemId = document.getElementById('edit-item-id').value;
     const description = document.getElementById('edit-description').value;
     const addedBy = document.getElementById('edit-added-by').value;
@@ -323,6 +344,11 @@ async function updateItem(event) {
     } catch (error) {
         console.error('Error updating item:', error);
         showNotification('Failed to update dream', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
     }
 }
 
@@ -330,6 +356,14 @@ async function deleteItem(itemId) {
     if (!confirm('Are you sure you want to delete this dream?')) {
         return;
     }
+    
+    const deleteBtn = event.target;
+    const originalText = deleteBtn.textContent;
+    
+    deleteBtn.disabled = true;
+    deleteBtn.textContent = 'Deleting...';
+    deleteBtn.style.opacity = '0.6';
+    deleteBtn.style.cursor = 'not-allowed';
     
     try {
         const response = await fetch(`${API_BASE}/items/${itemId}`, {
@@ -346,10 +380,21 @@ async function deleteItem(itemId) {
     } catch (error) {
         console.error('Error deleting item:', error);
         showNotification('Failed to delete dream', 'error');
+    } finally {
+        deleteBtn.disabled = false;
+        deleteBtn.textContent = originalText;
+        deleteBtn.style.opacity = '1';
+        deleteBtn.style.cursor = 'pointer';
     }
 }
 
-async function toggleComplete(itemId, isCompleted) {
+async function toggleComplete(itemId, isCompleted, checkbox) {
+    const originalState = !isCompleted;
+    
+    checkbox.disabled = true;
+    checkbox.style.opacity = '0.6';
+    checkbox.style.cursor = 'not-allowed';
+    
     try {
         const response = await fetch(`${API_BASE}/items/${itemId}`, {
             method: 'PUT',
@@ -372,12 +417,18 @@ async function toggleComplete(itemId, isCompleted) {
             }
         } else {
             showNotification('Failed to update status', 'error');
+            checkbox.checked = originalState;
             await loadItems();
         }
     } catch (error) {
         console.error('Error toggling complete:', error);
         showNotification('Failed to update status', 'error');
+        checkbox.checked = originalState;
         await loadItems();
+    } finally {
+        checkbox.disabled = false;
+        checkbox.style.opacity = '1';
+        checkbox.style.cursor = 'pointer';
     }
 }
 
@@ -395,6 +446,9 @@ function closePhotoModal() {
 async function uploadPhoto(event) {
     event.preventDefault();
     
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    
     const itemId = document.getElementById('photo-item-id').value;
     const fileInput = document.getElementById('photo-upload');
     const files = fileInput.files;
@@ -404,6 +458,11 @@ async function uploadPhoto(event) {
         return;
     }
     
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Uploading...';
+    submitBtn.style.opacity = '0.6';
+    submitBtn.style.cursor = 'not-allowed';
+    
     try {
         let successCount = 0;
         let failCount = 0;
@@ -411,6 +470,8 @@ async function uploadPhoto(event) {
         for (let i = 0; i < files.length; i++) {
             const formData = new FormData();
             formData.append('photo', files[i]);
+            
+            submitBtn.textContent = `Uploading ${i + 1}/${files.length}...`;
             
             const response = await fetch(`${API_BASE}/items/${itemId}/photos`, {
                 method: 'POST',
@@ -435,6 +496,11 @@ async function uploadPhoto(event) {
     } catch (error) {
         console.error('Error uploading photos:', error);
         showNotification('Failed to upload photos', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
     }
 }
 
@@ -444,6 +510,14 @@ async function deletePhoto(event, photoId) {
     if (!confirm('Delete this photo?')) {
         return;
     }
+    
+    const deleteBtn = event.target;
+    const originalText = deleteBtn.textContent;
+    
+    deleteBtn.disabled = true;
+    deleteBtn.textContent = 'Deleting...';
+    deleteBtn.style.opacity = '0.6';
+    deleteBtn.style.cursor = 'not-allowed';
     
     try {
         const response = await fetch(`${API_BASE}/photos/${photoId}`, {
@@ -459,6 +533,11 @@ async function deletePhoto(event, photoId) {
     } catch (error) {
         console.error('Error deleting photo:', error);
         showNotification('Failed to delete photo', 'error');
+    } finally {
+        deleteBtn.disabled = false;
+        deleteBtn.textContent = originalText;
+        deleteBtn.style.opacity = '1';
+        deleteBtn.style.cursor = 'pointer';
     }
 }
 
