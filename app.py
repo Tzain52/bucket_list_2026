@@ -142,38 +142,59 @@ def get_stats():
 
 @app.route('/api/items/<int:item_id>/hide', methods=['POST'])
 def hide_item(item_id):
-    item = BucketListItem.query.get_or_404(item_id)
-    item.is_hidden = True
-    db.session.commit()
-    return jsonify(item.to_dict())
+    try:
+        item = BucketListItem.query.get_or_404(item_id)
+        if hasattr(item, 'is_hidden'):
+            item.is_hidden = True
+            db.session.commit()
+            return jsonify(item.to_dict())
+        else:
+            return jsonify({'error': 'Hide feature not available. Database migration required.'}), 503
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/items/<int:item_id>/unhide', methods=['POST'])
 def unhide_item(item_id):
-    data = request.get_json()
-    password = data.get('password', '')
-    
-    if password != 'Bata143':
-        return jsonify({'error': 'Invalid password'}), 401
-    
-    item = BucketListItem.query.get_or_404(item_id)
-    item.is_hidden = False
-    db.session.commit()
-    return jsonify(item.to_dict())
+    try:
+        data = request.get_json()
+        password = data.get('password', '')
+        
+        if password != 'Bata143':
+            return jsonify({'error': 'Invalid password'}), 401
+        
+        item = BucketListItem.query.get_or_404(item_id)
+        if hasattr(item, 'is_hidden'):
+            item.is_hidden = False
+            db.session.commit()
+            return jsonify(item.to_dict())
+        else:
+            return jsonify({'error': 'Hide feature not available. Database migration required.'}), 503
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/items/unhide-all', methods=['POST'])
 def unhide_all_items():
-    data = request.get_json()
-    password = data.get('password', '')
-    
-    if password != 'Bata143':
-        return jsonify({'error': 'Invalid password'}), 401
-    
-    hidden_items = BucketListItem.query.filter_by(is_hidden=True).all()
-    for item in hidden_items:
-        item.is_hidden = False
-    
-    db.session.commit()
-    return jsonify({'message': f'Unhidden {len(hidden_items)} items', 'count': len(hidden_items)})
+    try:
+        data = request.get_json()
+        password = data.get('password', '')
+        
+        if password != 'Bata143':
+            return jsonify({'error': 'Invalid password'}), 401
+        
+        if hasattr(BucketListItem, 'is_hidden'):
+            hidden_items = BucketListItem.query.filter_by(is_hidden=True).all()
+            for item in hidden_items:
+                item.is_hidden = False
+            
+            db.session.commit()
+            return jsonify({'message': f'Unhidden {len(hidden_items)} items', 'count': len(hidden_items)})
+        else:
+            return jsonify({'error': 'Hide feature not available. Database migration required.'}), 503
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

@@ -22,7 +22,7 @@ class BucketListItem(db.Model):
             'description': self.description,
             'added_by': self.added_by,
             'is_completed': self.is_completed,
-            'is_hidden': self.is_hidden,
+            'is_hidden': getattr(self, 'is_hidden', False),
             'photos': [photo.to_dict() for photo in self.photos],
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'completed_at': self.completed_at.isoformat() if self.completed_at else None
