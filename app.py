@@ -61,6 +61,9 @@ def update_item(item_id):
         else:
             item.completed_at = None
     
+    if 'is_hidden' in data:
+        item.is_hidden = data['is_hidden']
+    
     db.session.commit()
     return jsonify(item.to_dict())
 
@@ -136,6 +139,41 @@ def get_stats():
         'pending': pending,
         'completion_percentage': round(completion_percentage, 1)
     })
+
+@app.route('/api/items/<int:item_id>/hide', methods=['POST'])
+def hide_item(item_id):
+    item = BucketListItem.query.get_or_404(item_id)
+    item.is_hidden = True
+    db.session.commit()
+    return jsonify(item.to_dict())
+
+@app.route('/api/items/<int:item_id>/unhide', methods=['POST'])
+def unhide_item(item_id):
+    data = request.get_json()
+    password = data.get('password', '')
+    
+    if password != 'Bata143':
+        return jsonify({'error': 'Invalid password'}), 401
+    
+    item = BucketListItem.query.get_or_404(item_id)
+    item.is_hidden = False
+    db.session.commit()
+    return jsonify(item.to_dict())
+
+@app.route('/api/items/unhide-all', methods=['POST'])
+def unhide_all_items():
+    data = request.get_json()
+    password = data.get('password', '')
+    
+    if password != 'Bata143':
+        return jsonify({'error': 'Invalid password'}), 401
+    
+    hidden_items = BucketListItem.query.filter_by(is_hidden=True).all()
+    for item in hidden_items:
+        item.is_hidden = False
+    
+    db.session.commit()
+    return jsonify({'message': f'Unhidden {len(hidden_items)} items', 'count': len(hidden_items)})
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

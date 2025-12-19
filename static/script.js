@@ -142,6 +142,14 @@ async function loadItems() {
         const response = await fetch(`${API_BASE}/items`);
         const items = await response.json();
         currentItems = items;
+        
+        // Check if there are any hidden items
+        const hasHiddenItems = items.some(item => item.is_hidden);
+        const unhideAllBtn = document.getElementById('unhide-all-btn');
+        if (unhideAllBtn) {
+            unhideAllBtn.style.display = hasHiddenItems ? 'inline-flex' : 'none';
+        }
+        
         renderItems(items);
     } catch (error) {
         console.error('Error loading items:', error);
@@ -214,49 +222,81 @@ function renderItems(items) {
             </div>
         ` : '';
         
-        return `
-            <div class="item-card ${item.is_completed ? 'completed' : ''}" id="item-${item.id}">
-                <div class="item-header">
-                    <div class="checkbox-wrapper">
-                        <input 
-                            type="checkbox" 
-                            class="checkbox" 
-                            ${item.is_completed ? 'checked' : ''}
-                            onchange="toggleComplete(${item.id}, this.checked, this)"
-                        >
+        if (item.is_hidden) {
+            return `
+                <div class="item-card hidden" id="item-${item.id}">
+                    <div class="item-content">
+                        <div class="item-header">
+                            <div class="checkbox-wrapper">
+                                <input type="checkbox" class="checkbox" disabled>
+                            </div>
+                            <span class="item-badge">${item.added_by}</span>
+                        </div>
+                        <div class="item-description">${escapeHtml(item.description)}</div>
+                        <div class="item-meta">
+                            <span class="item-author">Hidden content</span>
+                            <span class="item-date">${createdDate}</span>
+                        </div>
                     </div>
-                    <span class="item-badge">${item.added_by}</span>
-                </div>
-                
-                <div class="item-description">${escapeHtml(item.description)}</div>
-                
-                <div class="item-meta">
-                    <span class="item-author">Added by ${item.added_by}</span>
-                    <span class="item-date">${createdDate}</span>
-                </div>
-                
-                ${item.is_completed && completedDate ? `
-                    <div class="completion-badge">
-                        ✨ Completed on ${completedDate}
-                    </div>
-                ` : ''}
-                
-                ${item.is_completed ? `
-                    <div class="photo-upload-section" id="upload-section-${item.id}">
-                        ${photosHTML}
-                        <button class="btn-small btn-photo" onclick="openPhotoModal(${item.id})">
-                            📸 ${item.photos && item.photos.length > 0 ? 'Add More Photos' : 'Add Photo'}
+                    <div class="hidden-lock-overlay">
+                        <div class="hidden-lock-icon">🔒</div>
+                        <div class="hidden-text">Hidden</div>
+                        <button class="btn-small btn-primary" onclick="openUnhideModal(${item.id})" style="pointer-events: auto;">
+                            🔓 Unhide
                         </button>
                     </div>
-                ` : ''}
-                
-                <div class="item-actions">
-                    <button class="btn-small btn-edit" onclick="openEditModal(${item.id})">
-                        ✏️ Edit
-                    </button>
-                    <button class="btn-small btn-delete" onclick="deleteItem(${item.id})">
-                        🗑️ Delete
-                    </button>
+                </div>
+            `;
+        }
+        
+        return `
+            <div class="item-card ${item.is_completed ? 'completed' : ''}" id="item-${item.id}">
+                <div class="item-content">
+                    <div class="item-header">
+                        <div class="checkbox-wrapper">
+                            <input 
+                                type="checkbox" 
+                                class="checkbox" 
+                                ${item.is_completed ? 'checked' : ''}
+                                onchange="toggleComplete(${item.id}, this.checked, this)"
+                            >
+                        </div>
+                        <span class="item-badge">${item.added_by}</span>
+                    </div>
+                    
+                    <div class="item-description">${escapeHtml(item.description)}</div>
+                    
+                    <div class="item-meta">
+                        <span class="item-author">Added by ${item.added_by}</span>
+                        <span class="item-date">${createdDate}</span>
+                    </div>
+                    
+                    ${item.is_completed && completedDate ? `
+                        <div class="completion-badge">
+                            ✨ Completed on ${completedDate}
+                        </div>
+                    ` : ''}
+                    
+                    ${item.is_completed ? `
+                        <div class="photo-upload-section" id="upload-section-${item.id}">
+                            ${photosHTML}
+                            <button class="btn-small btn-photo" onclick="openPhotoModal(${item.id})">
+                                📸 ${item.photos && item.photos.length > 0 ? 'Add More Photos' : 'Add Photo'}
+                            </button>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="item-actions">
+                        <button class="btn-small btn-edit" onclick="openEditModal(${item.id})">
+                            ✏️ Edit
+                        </button>
+                        <button class="btn-small btn-hide" onclick="hideItem(${item.id})">
+                            👁️
+                        </button>
+                        <button class="btn-small btn-delete" onclick="deleteItem(${item.id})">
+                            🗑️ Delete
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
@@ -623,11 +663,131 @@ function showNotification(message, type = 'success') {
     }, 3000);
 }
 
+// Hide/Unhide functionality
+let pendingUnhideItemId = null;
+let pendingUnhideAll = false;
+
+async function hideItem(itemId) {
+    try {
+        const response = await fetch(`${API_BASE}/items/${itemId}/hide`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            await loadItems();
+            showNotification('Item hidden 🔒', 'success');
+        } else {
+            showNotification('Failed to hide item', 'error');
+        }
+    } catch (error) {
+        console.error('Error hiding item:', error);
+        showNotification('Failed to hide item', 'error');
+    }
+}
+
+function openUnhideModal(itemId) {
+    pendingUnhideItemId = itemId;
+    pendingUnhideAll = false;
+    document.getElementById('password-input').value = '';
+    document.getElementById('password-error').textContent = '';
+    document.getElementById('password-modal').classList.add('show');
+    setTimeout(() => {
+        document.getElementById('password-input').focus();
+    }, 100);
+}
+
+function openUnhideAllModal() {
+    pendingUnhideItemId = null;
+    pendingUnhideAll = true;
+    document.getElementById('password-input').value = '';
+    document.getElementById('password-error').textContent = '';
+    document.getElementById('password-modal').classList.add('show');
+    setTimeout(() => {
+        document.getElementById('password-input').focus();
+    }, 100);
+}
+
+function closePasswordModal() {
+    document.getElementById('password-modal').classList.remove('show');
+    pendingUnhideItemId = null;
+    pendingUnhideAll = false;
+    document.getElementById('password-input').value = '';
+    document.getElementById('password-error').textContent = '';
+}
+
+async function submitPassword(event) {
+    event.preventDefault();
+    
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    const password = document.getElementById('password-input').value;
+    const errorDiv = document.getElementById('password-error');
+    
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Verifying...';
+    submitBtn.style.opacity = '0.6';
+    errorDiv.textContent = '';
+    
+    try {
+        if (pendingUnhideAll) {
+            const response = await fetch(`${API_BASE}/items/unhide-all`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ password })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                closePasswordModal();
+                await loadItems();
+                showNotification(`${data.count} item${data.count !== 1 ? 's' : ''} unhidden 🔓`, 'success');
+            } else {
+                errorDiv.textContent = '❌ Incorrect password';
+                document.getElementById('password-input').value = '';
+                document.getElementById('password-input').focus();
+            }
+        } else if (pendingUnhideItemId) {
+            const response = await fetch(`${API_BASE}/items/${pendingUnhideItemId}/unhide`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ password })
+            });
+            
+            if (response.ok) {
+                closePasswordModal();
+                await loadItems();
+                showNotification('Item unhidden 🔓', 'success');
+            } else {
+                errorDiv.textContent = '❌ Incorrect password';
+                document.getElementById('password-input').value = '';
+                document.getElementById('password-input').focus();
+            }
+        }
+    } catch (error) {
+        console.error('Error unhiding:', error);
+        errorDiv.textContent = '❌ An error occurred';
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+        submitBtn.style.opacity = '1';
+    }
+}
+
 window.onclick = function(event) {
     const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
         if (event.target === modal) {
             modal.classList.remove('show');
+            if (modal.id === 'password-modal') {
+                closePasswordModal();
+            }
         }
     });
 }

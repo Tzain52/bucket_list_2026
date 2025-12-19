@@ -65,6 +65,10 @@
                 <span class="btn-icon">+</span>
                 Add New Dream
             </button>
+            <button class="btn btn-secondary" onclick="openUnhideAllModal()" id="unhide-all-btn" style="display: none;">
+                <span class="btn-icon">🔓</span>
+                Unhide All
+            </button>
         </section>
 
         <section class="items-section">
@@ -182,6 +186,33 @@
             </div>
             <div class="photo-gallery" id="photo-gallery">
             </div>
+        </div>
+    </div>
+
+    <!-- Password Modal -->
+    <div class="modal" id="password-modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2 class="modal-title">🔒 Enter Password</h2>
+                <button class="close-btn" onclick="closePasswordModal()">&times;</button>
+            </div>
+            <form onsubmit="submitPassword(event)">
+                <div class="form-group">
+                    <label for="password-input">Password required to unhide</label>
+                    <input 
+                        type="password" 
+                        id="password-input" 
+                        class="form-input"
+                        placeholder="Enter password"
+                        required
+                        autocomplete="off">
+                    <div class="password-error" id="password-error"></div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closePasswordModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Unlock</button>
+                </div>
+            </form>
         </div>
     </div>
 

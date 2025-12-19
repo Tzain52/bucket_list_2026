@@ -10,6 +10,7 @@ class BucketListItem(db.Model):
     description = db.Column(db.String(500), nullable=False)
     added_by = db.Column(db.String(100), nullable=False)
     is_completed = db.Column(db.Boolean, default=False)
+    is_hidden = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     completed_at = db.Column(db.DateTime, nullable=True)
     
@@ -21,6 +22,7 @@ class BucketListItem(db.Model):
             'description': self.description,
             'added_by': self.added_by,
             'is_completed': self.is_completed,
+            'is_hidden': self.is_hidden,
             'photos': [photo.to_dict() for photo in self.photos],
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'completed_at': self.completed_at.isoformat() if self.completed_at else None

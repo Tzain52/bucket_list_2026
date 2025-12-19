@@ -361,8 +361,12 @@ body {
 }
 
 .action-section {
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
     margin-bottom: 40px;
+    flex-wrap: wrap;
 }
 
 .btn {
@@ -444,6 +448,74 @@ body {
     transform: translateY(-4px);
     box-shadow: var(--shadow-md);
     border-color: var(--primary);
+}
+
+/* Hidden Card Styles */
+.item-card.hidden {
+    position: relative;
+    pointer-events: none;
+}
+
+.item-card.hidden .item-content {
+    filter: blur(12px);
+    opacity: 0.3;
+    user-select: none;
+    pointer-events: none;
+}
+
+.item-card.hidden::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(255, 254, 249, 0.85) 0%, 
+        rgba(245, 230, 211, 0.9) 50%, 
+        rgba(255, 254, 249, 0.85) 100%);
+    backdrop-filter: blur(8px) saturate(150%);
+    -webkit-backdrop-filter: blur(8px) saturate(150%);
+    border-radius: var(--border-radius);
+    pointer-events: none;
+}
+
+.hidden-lock-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    pointer-events: auto;
+}
+
+.hidden-lock-icon {
+    font-size: 4rem;
+    animation: lockPulse 2s ease-in-out infinite;
+    filter: drop-shadow(0 4px 8px rgba(125, 46, 46, 0.3));
+}
+
+@keyframes lockPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+.hidden-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--maroon-dark);
+    text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8);
 }
 
 .item-card.completed {
@@ -540,6 +612,15 @@ body {
 
 .btn-edit:hover {
     background: var(--beige-dark);
+}
+
+.btn-hide {
+    background: var(--beige-warm);
+    color: var(--maroon-dark);
+}
+
+.btn-hide:hover {
+    background: var(--accent);
 }
 
 .btn-delete {
@@ -803,6 +884,18 @@ body {
     text-align: center;
     padding: 40px;
     color: var(--text-medium);
+}
+
+.modal-small {
+    max-width: 400px;
+}
+
+.password-error {
+    color: var(--maroon);
+    font-size: 0.875rem;
+    margin-top: 8px;
+    min-height: 20px;
+    font-weight: 500;
 }
 
 .notification {
