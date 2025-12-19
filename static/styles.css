@@ -65,35 +65,73 @@ body {
 
 .header {
     text-align: center;
-    padding: 40px 20px;
+    padding: 0;
     margin-bottom: 40px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
 }
 
 .header-content {
-    background: rgba(255, 254, 249, 0.95);
-    backdrop-filter: blur(10px);
-    padding: 40px;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-md);
-    border: 2px solid var(--beige-dark);
+    background-image: url('image.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 80px 40px;
+    position: relative;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.header-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(125, 46, 46, 0.1) 0%, rgba(168, 72, 72, 0.05) 100%);
+    pointer-events: none;
 }
 
 .title {
     font-family: 'Playfair Display', serif;
-    font-size: 3rem;
+    font-size: 3.5rem;
     font-weight: 700;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--maroon-dark);
+    text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8), 
+                 0 0 20px rgba(255, 255, 255, 0.6);
     margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
 }
 
 .subtitle {
-    font-size: 1.1rem;
-    color: var(--text-medium);
-    font-weight: 300;
+    font-size: 1.3rem;
+    color: var(--text-dark);
+    font-weight: 400;
     font-style: italic;
+    text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.9);
+    position: relative;
+    z-index: 1;
+}
+
+@media (max-width: 768px) {
+    .header-content {
+        padding: 60px 20px;
+        min-height: 250px;
+    }
+    
+    .title {
+        font-size: 2.5rem;
+    }
+    
+    .subtitle {
+        font-size: 1.1rem;
+    }
 }
 
 .stats-section {
